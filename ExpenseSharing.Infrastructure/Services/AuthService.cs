@@ -108,6 +108,7 @@ public class AuthService : IAuthService
         var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+             new Claim("UserId", user.Id.ToString()),   
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
         };
 
@@ -118,7 +119,7 @@ public class AuthService : IAuthService
             issuer: _configuration["Jwt:Issuer"],
             audience: _configuration["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(1), // Token validity
+            expires: DateTime.UtcNow.AddHours(1),
             signingCredentials: credentials
         );
 

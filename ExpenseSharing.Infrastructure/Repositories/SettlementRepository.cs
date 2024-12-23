@@ -24,7 +24,7 @@ namespace ExpenseSharing.Infrastructure.Repositories
 
         public async Task<Settlement> GetAsync(Expression<Func<Settlement, bool>> predicate)
         {
-            return await _context.Settlements.Include(s => s.Expense).FirstOrDefaultAsync(predicate);
+            return await _context.Settlements.Include(s => s.Expense).FirstOrDefaultAsync(predicate);   
         }
 
         public async Task<PaginatedList<Settlement>> GetAllAsync(PageRequest pageRequest, bool usePaging = true)

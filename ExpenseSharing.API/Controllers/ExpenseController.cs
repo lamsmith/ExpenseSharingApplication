@@ -42,10 +42,10 @@ namespace ExpenseSharing.API.Controllers
             }
             catch (Exception)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An error occurred while deleting user's account." });
+                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An unexpected error occurred." });
             }
         }
-        
+
         [HttpPost("{expenseId}/settlement-history")]
         public async Task<IActionResult> GetSettlementHistory([FromRoute] GetSettlementHistoryForExpenseQuery command)
         {
@@ -56,23 +56,23 @@ namespace ExpenseSharing.API.Controllers
             }
             catch (Exception)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An error occurred while deleting user's account." });
+                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An unexpected error occurred." });
             }
         }
-          
+
 
         [HttpPost("{expenseId}/pay-expense-share")]
         public async Task<IActionResult> PayExpenseShare([FromBody] CreateSettlementCommand command)
         {
             try
-            {               
+            {
                 var response = await _mediator.Send(command);
                 return Ok(new { settlement_history = response });
             }
             catch (InvalidParameterException ex)
             {
                 return BadRequest(new { message = ex.Message });
-            } 
+            }
             catch (UserNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
@@ -102,10 +102,10 @@ namespace ExpenseSharing.API.Controllers
             }
             catch (Exception)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An error occurred while deleting user's account." });
+                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An error occurred while retrieving the expense details." });
             }
         }
-        
+
         [HttpGet("{expenseId}")]
         public async Task<IActionResult> GetExpense([FromRoute] GetExpenseDetailsQuery query)
         {

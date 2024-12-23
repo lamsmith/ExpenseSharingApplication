@@ -35,7 +35,14 @@ public static class MappingExtensions
         return new GroupResponseModel()
         {
             Id = group.Id,
-            Name = group.Name
+            Name = group.Name,
+            Members = group.Members?.Select(member => new UserResponseModel
+            {
+                 FirstName = member.User.FirstName,
+                 LastName = member.User.LastName,
+                 Email = member.User.Email
+            }).ToList()
+
         };
     }
 
@@ -43,7 +50,10 @@ public static class MappingExtensions
     {
         return new ExpenseResponseModel()
         {
-
+            Id = expense.Id,
+            Amount = expense.Amount,
+            Date = expense.CreatedAt,
+            Description = expense.Description
         };
     }
 }

@@ -22,43 +22,69 @@ namespace ExpenseSharing.API.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetUser([FromRoute] GetUserByIdQuery query)
+        [HttpGet("current")]
+        public async Task<IActionResult> GetUser()
         {
             try
             {
+                var userIdClaim = User.FindFirst("UserId")?.Value;
+                if (string.IsNullOrEmpty(userIdClaim))
+                {
+                    return Unauthorized(new { message = "User is not authenticated." });
+                }
+
+                if (!Guid.TryParse(userIdClaim, out Guid currentUserId))
+                {
+                    return BadRequest(new { message = "Invalid user ID format." });
+                }
+
+                var query = new GetUserByIdQuery { UserId = currentUserId };
                 var response = await _mediator.Send(query);
                 return Ok(new { user = response });
             }
-            catch(UserNotFoundException ex)
+            catch (UserNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
             }
             catch (Exception)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An error occurred while deleting user's account." });
+                return StatusCode((int)HttpStatusCode.InternalServerError,
+                    new { message = "An error occurred while retrieving user details." });
             }
         }
 
-        [HttpGet("{userId}/groups")]
-        public async Task<IActionResult> GetUserGroups([FromRoute] GetGroupsForUserQuery query)
+        [HttpGet("current/groups")]
+        public async Task<IActionResult> GetUserGroups()
         {
             try
             {
+                var userIdClaim = User.FindFirst("UserId")?.Value;
+                if (string.IsNullOrEmpty(userIdClaim))
+                {
+                    return Unauthorized(new { message = "User is not authenticated." });
+                }
+
+                if (!Guid.TryParse(userIdClaim, out Guid currentUserId))
+                {
+                    return BadRequest(new { message = "Invalid user ID format." });
+                }
+
+                var query = new GetGroupsForUserQuery { UserId = currentUserId };
                 var response = await _mediator.Send(query);
                 return Ok(new { groups = response });
             }
-            catch(UserNotFoundException ex)
+            catch (UserNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
             }
             catch (Exception)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An error occurred while deleting user's account." });
+                return StatusCode((int)HttpStatusCode.InternalServerError,
+                    new { message = "An error occurred while retrieving user's groups." });
             }
         }
 
-        [HttpGet("{userId}/settlement-history")]
+        [HttpGet("current/settlement-history")]
         public async Task<IActionResult> GetUserGroups([FromRoute] GetSettlementHistoryForUserQuery query)
         {
             try
@@ -71,5 +97,69 @@ namespace ExpenseSharing.API.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An error occurred while deleting user's account." });
             }
         }
+
+        [HttpPost("wallet/topup")]
+        public async Task<IActionResult> DepositToWallet([FromBody] DepositToWalletCommand command)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst("UserId")?.Value;
+                if (string.IsNullOrEmpty(userIdClaim))
+                {
+                    return Unauthorized(new { message = "User is not authenticated." });
+                }
+                if (!Guid.TryParse(userIdClaim, out Guid currentUserId))
+                {
+                    return BadRequest(new { message = "Invalid user ID format." });
+                }
+                command.UserId = currentUserId;  // Set the UserId from the authenticated user
+                var response = await _mediator.Send(command);
+                return Ok(new { message = "Wallet successfully deposited", balance = response });
+            }
+            catch (UserNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidParameterException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An error occurred while Deposited wallet." });
+            }
+        }
+
+
+        [HttpGet("wallet/balance")]
+        public async Task<IActionResult> GetWalletBalance()
+        {
+            try
+            {
+
+                var userId = User.FindFirst("UserId")?.Value;
+
+
+                if (string.IsNullOrEmpty(userId))
+                    return Unauthorized(new { message = "User is not authenticated." });
+
+                var query = new GetWalletBalanceQuery { UserId = Guid.Parse(userId) };
+
+                var response = await _mediator.Send(query);
+                return Ok(new { balance = response });
+            }
+            catch (UserNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An error occurred while fetching wallet balance." });
+            }
+        }
+
     }
 }
+
+
+

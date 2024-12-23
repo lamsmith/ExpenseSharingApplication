@@ -19,14 +19,19 @@ Recording payments between users
 Updating balances after payments
 API Endpoints
 
+GET /api/groups/{groupId}/balances - Retrieve the balance of each user within a group (amount owed/paid).
+
 Authentication Endpoints
 POST /api/authentication/login - Logs in a user and returns an access token.
 POST /api/authentication/register - Registers a new user.
 POST /api/authentication/logout - Logs out the authenticated user
+
 User Endpoints
 GET /api/users/{userId} - Retrieve details of a specific user by their ID.
 GET /api/users/{userId}/groups - Retrieve all groups the specified user belongs to.
 GET /api/users/{userId}/settlement-history - Retrieve the settlement history for a specific user.
+GET /api/User/wallet/balance - User check his balance
+GET 
 
 Group Endpoints
 POST /api/groups - Create a new group.
@@ -34,8 +39,7 @@ POST /api/groups/{groupId}/add-user - Add a user to a group.
 POST /api/groups/{groupId}/remove-user - Remove a user from a group.
 GET /api/groups - Retrieve all groups the authenticated user belongs to.
 GET /api/groups/{groupId} - Retrieve details of a specific group by its ID.
-GET /api/groups/{groupId}/balances - Retrieve the balance of each user within a group (amount owed/paid).
-GET /api/groups/{groupId}/expenses - Retrieve the expenses within a specific group.
+
 
 Expense Endpoints
 POST /api/expenses - Create a new expense.

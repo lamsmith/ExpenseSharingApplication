@@ -20,6 +20,8 @@ namespace ExpenseSharing.Infrastructure.Persistence.Repositories
         {
             var query = _context.Expenses.Include(e => e.Group).Where(exp);
 
+            Console.WriteLine(query);
+
             query = query.OrderBy(r => r.CreatedAt);
 
             var totalItemsCount = await query.CountAsync();

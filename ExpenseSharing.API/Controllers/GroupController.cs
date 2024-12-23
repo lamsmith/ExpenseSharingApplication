@@ -43,19 +43,18 @@ namespace ExpenseSharing.API.Controllers
         {
             try
             {
+                var  groupId = command.GroupId;
                 var response = await _mediator.Send(command);
-                if (response)
-                    return Ok(new { message = "User successfully added to group" });
-                return BadRequest();
+                return response
+                    ? Ok(new { message = "User successfully added to group", groupId, command.Email })
+                    : BadRequest(new { message = "Failed to add user to group." });
+               
             }
             catch (InvalidParameterException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
-            catch (Exception)
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An error occurred while deleting user's account." });
-            }
+           
         }
 
         [HttpPost("{groupId}/remove-user")]
@@ -88,13 +87,13 @@ namespace ExpenseSharing.API.Controllers
             }
             catch (Exception)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An error occurred while deleting user's account." });
+                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An error occurred while fetching groups." });
             }
         }
 
         [HttpGet("{groupId}")]
         public async Task<IActionResult> GetGroup([FromRoute] GetGroupByIdQuery query)
-        {
+            {
             try
             {
                 var response = await _mediator.Send(query);
@@ -106,7 +105,7 @@ namespace ExpenseSharing.API.Controllers
             }
             catch (Exception)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An error occurred while deleting user's account." });
+                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An error occurred while fetching the group." });
             }
         }
     }
