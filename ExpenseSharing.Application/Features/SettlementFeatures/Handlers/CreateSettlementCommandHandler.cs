@@ -40,15 +40,16 @@ namespace ExpenseSharing.Application.Features.SettlementFeatures.Command
             var wallet = await walletRepository.GetByUserIdAsync(loginUser.Id);
             if (wallet.Balance < request.Settlement.Amount) 
             {
-                throw new InvalidParameterException("wallet balance less the amount");
+                throw new InvalidParameterException("Wallet balance is insufficient for the requested settlement amount.");
             }
 
-            var settlement = await _settlementRepository.GetAsync(x => x.UserId == loginUser.Id && x.ExpenseId == request.ExpenseId);
+            var settlement = await _settlementRepository.GetAsync(x => x.UserId == loginUser.Id && x.ExpenseId == request.ExpenseId)
+                ?? throw new InvalidParameterException("Settlement not found.");
           
             var amountToPay = Math.Min(request.Settlement.Amount, settlement.Amount - settlement.AmountPaid);
             if (amountToPay <= 0)
             {
-                throw new InvalidParameterException("this settlement is already settle");
+                throw new InvalidParameterException("This settlement is already completed.");
             }
             
             settlement.AmountPaid += amountToPay;
@@ -61,7 +62,8 @@ namespace ExpenseSharing.Application.Features.SettlementFeatures.Command
             //check if all payment is settled and update the expense settled status 
             if (settlement.AmountPaid == settlement.Amount)
             {
-                var expense = await _expenseRepository.GetByIdAsync(request.ExpenseId);
+                var expense = await _expenseRepository.GetByIdAsync(request.ExpenseId)
+                    ?? throw new InvalidParameterException("Expense not found.");
 
                 var expenseSettlements = await _settlementRepository.GetAllAsync(x => x.ExpenseId == request.ExpenseId, null, false);
 
@@ -82,6 +84,7 @@ namespace ExpenseSharing.Application.Features.SettlementFeatures.Command
                 Type = TransactionType.Debit,
                 Narration = "Settlement transaction",
                 WalletId = wallet.Id,
+                ExpenseId = settlement.ExpenseId,
             };
 
 

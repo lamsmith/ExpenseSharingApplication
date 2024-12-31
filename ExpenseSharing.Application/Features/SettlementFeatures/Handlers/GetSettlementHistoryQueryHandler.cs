@@ -21,39 +21,9 @@ namespace ExpenseSharing.Application.Features.SettlementFeatures.Handlers
         public async Task<PaginatedList<SettlementResponseModel>> Handle(GetSettlementHistoryQuery request, CancellationToken cancellationToken)
         {
             var settlements = await _settlementRepository.GetAllAsync(request, request.UsePaging);
-            return settlements.ToPaginated(settlements.Items.Select(s =>s.ToSettlementResponse()));
+            return settlements.ToPaginated(settlements.Items.Select(s => s.ToSettlementResponse()));
         }
     }
 
-    public class GetSettlementHistoryForUserQueryHandler : IRequestHandler<GetSettlementHistoryForUserQuery, PaginatedList<SettlementResponseModel>>
-    {
-        private readonly ISettlementRepository _settlementRepository;
 
-        public GetSettlementHistoryForUserQueryHandler(ISettlementRepository settlementRepository)
-        {
-            _settlementRepository = settlementRepository;
-        }
-
-        public async Task<PaginatedList<SettlementResponseModel>> Handle(GetSettlementHistoryForUserQuery? request, CancellationToken cancellationToken)
-        {
-            var settlements = await _settlementRepository.GetAllAsync(x => x.UserId == request.UserId, request, request.UsePaging);
-            return settlements.ToPaginated(settlements.Items.Select(s =>s.ToSettlementResponse()));;
-        }
-    }
-
-    public class GetSettlementHistoryForExpenseQueryHandler : IRequestHandler<GetSettlementHistoryForExpenseQuery, PaginatedList<SettlementResponseModel>>
-    {
-        private readonly ISettlementRepository _settlementRepository;
-
-        public GetSettlementHistoryForExpenseQueryHandler(ISettlementRepository settlementRepository)
-        {
-            _settlementRepository = settlementRepository;
-        }
-
-        public async Task<PaginatedList<SettlementResponseModel>> Handle(GetSettlementHistoryForExpenseQuery? request, CancellationToken cancellationToken)
-        {
-            var settlements = await _settlementRepository.GetAllAsync(x => x.ExpenseId == request.ExpenseId, request, request.UsePaging);
-            return settlements.ToPaginated(settlements.Items.Select(s =>s.ToSettlementResponse()));
-        }
-    }
 }

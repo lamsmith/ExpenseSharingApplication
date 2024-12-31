@@ -1,5 +1,7 @@
-﻿using ExpenseSharing.Application.Common.Interfaces.Repository;
+﻿using ExpenseSharing.Application.Common.Exceptions;
+using ExpenseSharing.Application.Common.Interfaces.Repository;
 using ExpenseSharing.Domain.Entities;
+using ExpenseSharing.Domain.Enums;
 using ExpenseSharing.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,11 +24,16 @@ namespace ExpenseSharing.Infrastructure.Repositories
 
         public async Task<Transaction> GetByIdAsync(Guid transactionId)
         {
-            return await _dbContext.Transactions
-                .FirstOrDefaultAsync(t => t.Id == transactionId);
+            var transaction = await _dbContext.Transactions
+         .FirstOrDefaultAsync(t => t.Id == transactionId);
+
+            if (transaction == null)
+                throw new NotFoundException($"Transaction with ID {transactionId} not found.");
+
+            return transaction;
         }
 
-        public async Task<IEnumerable<Transaction>> GetByWalletIdAsync(Guid walletId)
+        public async Task<IEnumerable<Transaction>> GetAllTranscationByWalletIdAsync(Guid walletId)
         {
             return await _dbContext.Transactions
                 .Where(t => t.WalletId == walletId)
@@ -39,5 +46,20 @@ namespace ExpenseSharing.Infrastructure.Repositories
                 .Where(t => t.ExpenseId == expenseId)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Transaction>> GetSettlementHistoryByExpenseIdAsync(Guid expenseId)
+        {
+            
+            return await _dbContext.Transactions
+                .Where(t => t.ExpenseId == expenseId && t.Type == TransactionType.Debit) 
+                .ToListAsync();
+        }
+
+
+       
+
+       
+
+
     }
 }

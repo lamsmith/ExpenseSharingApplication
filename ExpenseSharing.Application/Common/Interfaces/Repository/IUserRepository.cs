@@ -12,6 +12,7 @@ namespace ExpenseSharing.Application.Common.Interfaces.Repository
         Task UpdateAsync(User user);
         Task DeleteAsync(Guid id);
         Task<User> GetByEmailAsync(string email);
+        string GetUserNameById(Guid userId);
         Task<IEnumerable<User>> GetUsersByIdsAsync(IEnumerable<Guid> userIds);
     }
 

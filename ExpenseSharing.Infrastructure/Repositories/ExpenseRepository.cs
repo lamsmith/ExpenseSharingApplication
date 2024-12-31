@@ -42,7 +42,9 @@ namespace ExpenseSharing.Infrastructure.Persistence.Repositories
         {
             try
             {
-                return await _context.Expenses.Include(e => e.Group).FirstOrDefaultAsync(e => e.Id == id);
+                return await _context.Expenses.Include(e => e.Group)
+                    .Include(e => e.Settlements)
+                    .FirstOrDefaultAsync(e => e.Id == id);
             }
             catch (Exception ex)
             {

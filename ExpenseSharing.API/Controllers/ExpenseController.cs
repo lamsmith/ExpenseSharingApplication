@@ -123,5 +123,57 @@ namespace ExpenseSharing.API.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An error occurred while retrieving the expense details." });
             }
         }
+
+        [HttpGet("current/settlements")]
+        public async Task<IActionResult> GetUserSettlements()
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst("UserId")?.Value;
+                if (string.IsNullOrEmpty(userIdClaim))
+                {
+                    return Unauthorized(new { message = "User is not authenticated." });
+                }
+
+                if (!Guid.TryParse(userIdClaim, out Guid currentUserId))
+                {
+                    return BadRequest(new { message = "Invalid user ID format." });
+                }
+
+                var query = new GetUserSettlementsQuery { UserId = currentUserId };
+                var response = await _mediator.Send(query);
+                return Ok(new { settlements = response });
+            }
+            catch (UserNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError,
+                    new { message = "An error occurred while retrieving settlement history." });
+            }
+        }
+
+        [HttpGet("{groupId}/settlements")]
+        public async Task<IActionResult> GetGroupSettlementHistory([FromRoute] GetSettlementHistoryForGroupQuery query)
+        {
+            try
+            {
+                //var query = new GetSettlementHistoryForGroupQuery { GroupId = groupId };
+                var response = await _mediator.Send(query);
+                return Ok(new { settlements = response });
+            }
+            catch (GroupNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError,
+                    new { message = "An error occurred while retrieving settlement history for the group." });
+            }
+        }
+
     }
 }

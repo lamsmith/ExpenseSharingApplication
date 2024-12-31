@@ -13,7 +13,7 @@ public record ExpenseDetailsResponse
     public string Description { get; init; }
     public decimal Amount { get; init; }
     public decimal AmountLeft { get; init; }
-    public IEnumerable<SettlementDetails> Settlements { get; init; }
+    public SettlementDetails Settlement { get; init; }
 }
 
 public record SettlementDetails

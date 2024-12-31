@@ -2,6 +2,7 @@
 using ExpenseSharing.Application.Features.Users.Commands;
 using ExpenseSharing.Application.Interfaces.Repositories;
 using ExpenseSharing.Domain.Entities;
+using ExpenseSharing.Domain.Enums;
 using ExpenseSharing.Domain.Exceptions;
 using MediatR;
 
@@ -11,11 +12,13 @@ public class DepositToWalletCommandHandler : IRequestHandler<DepositToWalletComm
 {
     private readonly IWalletRepository _walletRepository;
     private readonly IUserRepository _userRepository;
+    private readonly ITransactionRepository _transactionRepository;
 
-    public DepositToWalletCommandHandler(IWalletRepository walletRepository, IUserRepository userRepository)
+    public DepositToWalletCommandHandler(IWalletRepository walletRepository, IUserRepository userRepository, ITransactionRepository transactionRepository)
     {
         _walletRepository = walletRepository;
         _userRepository = userRepository;
+        _transactionRepository = transactionRepository; 
     }
 
     public async Task<decimal> Handle(DepositToWalletCommand request, CancellationToken cancellationToken)
@@ -29,15 +32,24 @@ public class DepositToWalletCommandHandler : IRequestHandler<DepositToWalletComm
         var wallet = await _walletRepository.GetByUserIdAsync(request.UserId);
 
         if (wallet == null)
-        {
             throw new WalletNotFoundException($"Wallet for User ID {request.UserId} does not exist");
 
-        }
-        else
+        // Update wallet balance
+        wallet.Balance += request.Amount;
+        await _walletRepository.UpdateAsync(wallet);
+
+        // Create and save the transaction
+        var transaction = new Transaction
         {
-            wallet.Balance += request.Amount;
-            await _walletRepository.UpdateAsync(wallet);
-        }
+            Id = Guid.NewGuid(),
+            Amount = request.Amount,
+            CreatedAt = DateTime.UtcNow,
+            Type = TransactionType.Credit,
+            Narration = "Deposit transaction",
+            WalletId = wallet.Id,
+        };
+
+        await _transactionRepository.AddAsync(transaction);
 
         return wallet.Balance;
     }

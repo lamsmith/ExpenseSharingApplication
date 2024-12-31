@@ -39,7 +39,8 @@ namespace ExpenseSharing.Infrastructure.Persistence.Repositories
 
         public async Task<User?> GetByIdAsync(Guid id)
         {
-            return await _context.Users.Include(u => u.Groups).ThenInclude(u => u.Group).FirstOrDefaultAsync(u => u.Id == id);
+            return await _context.Users.Include(u => u.Wallet).Include(u => u.Groups)
+                .ThenInclude(u => u.Group).FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<User> GetByEmailAsync(string email)
@@ -70,9 +71,17 @@ namespace ExpenseSharing.Infrastructure.Persistence.Repositories
             }
         }
 
-        public async Task<IEnumerable<User>> GetUsersByIdsAsync(IEnumerable<Guid> userIds)
+        public async Task<IEnumerable<User>> GetUsersByIdsAsync(IEnumerable <Guid> userIds)
         {
             return await _context.Users.Where(u => userIds.Contains(u.Id)).ToListAsync();
         }
+
+        public string GetUserNameById(Guid userId)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+            return user != null ? $"{user.FirstName} {user.LastName}" : "Unknown User";
+        }
+
+      
     }
 }

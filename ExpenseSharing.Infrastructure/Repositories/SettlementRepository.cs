@@ -79,5 +79,15 @@ namespace ExpenseSharing.Infrastructure.Repositories
         {
             return await _context.Settlements.Include(s => s.Expense).Where(s => settlementIds.Contains(s.Id)).ToListAsync();
         }
+
+
+        public async Task<List<Settlement>> GetSettlementsByGroupIdAsync(Guid groupId)
+        {
+            return await _context.Settlements
+                .Include(s => s.Expense)
+                .ThenInclude(e => e.Group)
+                .Where(s => s.Expense.GroupId == groupId)
+                .ToListAsync();
+        }
     }
 }

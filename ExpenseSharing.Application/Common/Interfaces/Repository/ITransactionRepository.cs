@@ -11,7 +11,8 @@ namespace ExpenseSharing.Application.Common.Interfaces.Repository
     {
         Task AddAsync(Transaction transaction);
         Task<Transaction> GetByIdAsync(Guid transactionId);
-        Task<IEnumerable<Transaction>> GetByWalletIdAsync(Guid walletId);
+        Task<IEnumerable<Transaction>> GetAllTranscationByWalletIdAsync(Guid walletId);
         Task<IEnumerable<Transaction>> GetByExpenseIdAsync(Guid expenseId);
+        Task<IEnumerable<Transaction>> GetSettlementHistoryByExpenseIdAsync(Guid expenseId);
     }
 }
